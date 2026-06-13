@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Bookmark, Share2, Check } from 'lucide-react'
 import StatusBadge from './StatusBadge'
 
@@ -16,7 +16,6 @@ function copyToClipboard(text) {
   if (navigator.clipboard && window.isSecureContext) {
     return navigator.clipboard.writeText(text)
   }
-  // Fallback for non-HTTPS (localhost http)
   const el = document.createElement('textarea')
   el.value = text
   el.style.position = 'fixed'
@@ -31,13 +30,20 @@ function copyToClipboard(text) {
 
 export default function JobCard({ job, onStatusChange }) {
   const [copied, setCopied] = useState(false)
+  const [isMobile, setIsMobile] = useState(window.innerWidth < 768)
+
+  useEffect(() => {
+    const fn = () => setIsMobile(window.innerWidth < 768)
+    window.addEventListener('resize', fn)
+    return () => window.removeEventListener('resize', fn)
+  }, [])
 
   if (!job) return null
 
-  const colorIdx = (job.company || '').charCodeAt(0) % LOGO_COLORS.length
+  const colorIdx  = (job.company || '').charCodeAt(0) % LOGO_COLORS.length
   const logoColor = LOGO_COLORS[colorIdx]
-  const initials = (job.company || 'XX').slice(0, 2).toUpperCase()
-  const skills = (job.skills || []).slice(0, 5)
+  const initials  = (job.company || 'XX').slice(0, 2).toUpperCase()
+  const skills    = (job.skills || []).slice(0, 5)
 
   const handleShare = () => {
     if (!job.applyLink) return
@@ -47,47 +53,52 @@ export default function JobCard({ job, onStatusChange }) {
     })
   }
 
+  const pad = isMobile ? '12px' : '16px'
+
   return (
     <div style={{
       background: '#fff', borderRadius: '10px',
       border: '1px solid #E5E5E0',
       borderLeft: job.isNew ? '3px solid #534AB7' : '1px solid #E5E5E0',
-      padding: '16px', marginBottom: '12px',
+      padding: pad, marginBottom: '10px',
     }}>
       {/* Top row */}
-      <div style={{ display: 'flex', gap: '12px', alignItems: 'flex-start' }}>
+      <div style={{ display: 'flex', gap: '10px', alignItems: 'flex-start' }}>
         <div style={{
-          width: '40px', height: '40px', borderRadius: '8px',
-          background: logoColor.bg, color: logoColor.color,
+          width: isMobile ? '34px' : '40px', height: isMobile ? '34px' : '40px',
+          borderRadius: '8px', background: logoColor.bg, color: logoColor.color,
           display: 'flex', alignItems: 'center', justifyContent: 'center',
-          fontSize: '13px', fontWeight: '700', flexShrink: 0,
+          fontSize: '12px', fontWeight: '700', flexShrink: 0,
         }}>
           {initials}
         </div>
 
         <div style={{ flex: 1, minWidth: 0 }}>
-          <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: '8px' }}>
-            <div>
-              <h3 style={{ fontSize: '14px', fontWeight: '700', color: '#1a1a1a', lineHeight: 1.3 }}>
+          <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: '6px' }}>
+            <div style={{ minWidth: 0 }}>
+              <h3 style={{
+                fontSize: isMobile ? '13px' : '14px', fontWeight: '700',
+                color: '#1a1a1a', lineHeight: 1.3,
+                overflow: 'hidden', textOverflow: 'ellipsis',
+                display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical',
+              }}>
                 {job.title}
               </h3>
               <p style={{ fontSize: '11px', color: '#777', marginTop: '2px' }}>
                 {job.company} · {job.location}
               </p>
             </div>
-            <div style={{ display: 'flex', gap: '4px', flexShrink: 0 }}>
-              {job.isNew && (
-                <span style={{
-                  background: '#EEEDFE', color: '#534AB7',
-                  fontSize: '9px', fontWeight: '700',
-                  padding: '2px 7px', borderRadius: '10px',
-                }}>NEW</span>
-              )}
-            </div>
+            {job.isNew && (
+              <span style={{
+                background: '#EEEDFE', color: '#534AB7',
+                fontSize: '9px', fontWeight: '700',
+                padding: '2px 6px', borderRadius: '10px', flexShrink: 0,
+              }}>NEW</span>
+            )}
           </div>
 
           {job.salary && (
-            <p style={{ fontSize: '13px', fontWeight: '700', color: '#0F6E56', marginTop: '6px' }}>
+            <p style={{ fontSize: isMobile ? '12px' : '13px', fontWeight: '700', color: '#0F6E56', marginTop: '5px' }}>
               {job.salary}
             </p>
           )}
@@ -96,12 +107,11 @@ export default function JobCard({ job, onStatusChange }) {
 
       {/* Skills */}
       {skills.length > 0 && (
-        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '5px', marginTop: '10px' }}>
+        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '4px', marginTop: '10px' }}>
           {skills.map(skill => (
             <span key={skill} style={{
               background: '#F8F8F6', border: '1px solid #E5E5E0',
-              fontSize: '10px', color: '#555',
-              padding: '2px 8px', borderRadius: '12px',
+              fontSize: '10px', color: '#555', padding: '2px 7px', borderRadius: '12px',
             }}>
               {skill}
             </span>
@@ -113,14 +123,12 @@ export default function JobCard({ job, onStatusChange }) {
       {job.whyItFitsMe && (
         <div style={{
           background: '#F8F8F6', borderRadius: '7px',
-          padding: '9px 11px', marginTop: '10px',
+          padding: '8px 10px', marginTop: '10px',
         }}>
           <span style={{
             fontSize: '10px', fontWeight: '700', color: '#0F6E56',
             textTransform: 'uppercase', letterSpacing: '0.5px',
-          }}>
-            Why it fits you ·{' '}
-          </span>
+          }}>Why it fits you · </span>
           <span style={{ fontSize: '11px', color: '#555', lineHeight: 1.4 }}>
             {job.whyItFitsMe}
           </span>
@@ -130,9 +138,9 @@ export default function JobCard({ job, onStatusChange }) {
       {/* Footer */}
       <div style={{
         display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-        marginTop: '12px', flexWrap: 'wrap', gap: '8px',
+        marginTop: '10px', flexWrap: 'wrap', gap: '8px',
       }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flexWrap: 'wrap' }}>
           <StatusBadge status={job.status} />
           <select
             value={job.status || 'new'}
@@ -159,7 +167,8 @@ export default function JobCard({ job, onStatusChange }) {
               cursor: 'pointer', display: 'flex', alignItems: 'center',
             }}
           >
-            <Bookmark size={13} color={job.status === 'saved' ? '#534AB7' : '#888'} fill={job.status === 'saved' ? '#534AB7' : 'none'} />
+            <Bookmark size={13} color={job.status === 'saved' ? '#534AB7' : '#888'}
+              fill={job.status === 'saved' ? '#534AB7' : 'none'} />
           </button>
 
           <button
@@ -186,8 +195,8 @@ export default function JobCard({ job, onStatusChange }) {
               rel="noopener noreferrer"
               style={{
                 background: '#534AB7', color: '#fff',
-                fontSize: '12px', fontWeight: '600',
-                padding: '6px 14px', borderRadius: '7px',
+                fontSize: isMobile ? '11px' : '12px', fontWeight: '600',
+                padding: isMobile ? '5px 10px' : '6px 14px', borderRadius: '7px',
                 textDecoration: 'none', whiteSpace: 'nowrap',
               }}
             >

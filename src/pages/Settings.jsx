@@ -13,12 +13,19 @@ const DEFAULT_SETTINGS = {
   minSalaryNL: '60000',
 }
 
-const ALL_ROLES = ['DevOps Engineer', 'Cloud Engineer', 'AI Engineer', 'MLOps Engineer', 'Platform Engineer', 'Site Reliability Engineer']
+const ALL_ROLES     = ['DevOps Engineer', 'Cloud Engineer', 'AI Engineer', 'MLOps Engineer', 'Platform Engineer', 'Site Reliability Engineer']
 const ALL_COUNTRIES = ['UK', 'Germany', 'Netherlands', 'France', 'Sweden', 'Denmark']
 
 export default function Settings() {
   const [settings, setSettings] = useState(DEFAULT_SETTINGS)
-  const [saved, setSaved] = useState(false)
+  const [saved, setSaved]       = useState(false)
+  const [isMobile, setIsMobile] = useState(window.innerWidth < 768)
+
+  useEffect(() => {
+    const fn = () => setIsMobile(window.innerWidth < 768)
+    window.addEventListener('resize', fn)
+    return () => window.removeEventListener('resize', fn)
+  }, [])
 
   useEffect(() => {
     const stored = localStorage.getItem('userSettings')
@@ -42,26 +49,26 @@ export default function Settings() {
     setTimeout(() => setSaved(false), 2500)
   }
 
+  const pad = isMobile ? '14px' : '20px'
+
   return (
     <div style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
       <Header title="Settings" subtitle="Configure your job search preferences" />
-      <div style={{ flex: 1, overflowY: 'auto', padding: '20px 24px' }}>
+      <div style={{ flex: 1, overflowY: 'auto', padding: isMobile ? '14px 16px' : '20px 24px' }}>
 
         {/* Profile */}
         <section style={{
           background: '#fff', border: '1px solid #E5E5E0',
-          borderRadius: '10px', padding: '20px', marginBottom: '16px',
+          borderRadius: '10px', padding: pad, marginBottom: '14px',
         }}>
-          <h2 style={{ fontSize: '14px', fontWeight: '700', color: '#1a1a1a', marginBottom: '14px' }}>
-            Profile
-          </h2>
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+          <h2 style={{ fontSize: '14px', fontWeight: '700', color: '#1a1a1a', marginBottom: '14px' }}>Profile</h2>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
             {[
-              { label: 'Full Name', key: 'name', placeholder: 'Your name' },
-              { label: 'Email', key: 'email', placeholder: 'your@email.com', type: 'email' },
-              { label: 'LinkedIn URL', key: 'linkedin', placeholder: 'https://linkedin.com/in/...', colSpan: 2 },
-            ].map(({ label, key, placeholder, type, colSpan }) => (
-              <div key={key} style={{ gridColumn: colSpan ? `span ${colSpan}` : undefined }}>
+              { label: 'Full Name',    key: 'name',     placeholder: 'Your name' },
+              { label: 'Email',        key: 'email',    placeholder: 'your@email.com', type: 'email' },
+              { label: 'LinkedIn URL', key: 'linkedin', placeholder: 'https://linkedin.com/in/...' },
+            ].map(({ label, key, placeholder, type }) => (
+              <div key={key}>
                 <label style={{ fontSize: '11px', color: '#666', fontWeight: '600', display: 'block', marginBottom: '4px' }}>
                   {label}
                 </label>
@@ -72,7 +79,7 @@ export default function Settings() {
                   placeholder={placeholder}
                   style={{
                     width: '100%', border: '1px solid #E5E5E0', borderRadius: '7px',
-                    padding: '8px 10px', fontSize: '13px', outline: 'none',
+                    padding: '8px 10px', fontSize: '13px', outline: 'none', boxSizing: 'border-box',
                   }}
                 />
               </div>
@@ -83,13 +90,11 @@ export default function Settings() {
         {/* Job Preferences */}
         <section style={{
           background: '#fff', border: '1px solid #E5E5E0',
-          borderRadius: '10px', padding: '20px', marginBottom: '16px',
+          borderRadius: '10px', padding: pad, marginBottom: '14px',
         }}>
-          <h2 style={{ fontSize: '14px', fontWeight: '700', color: '#1a1a1a', marginBottom: '14px' }}>
-            Job Preferences
-          </h2>
+          <h2 style={{ fontSize: '14px', fontWeight: '700', color: '#1a1a1a', marginBottom: '14px' }}>Job Preferences</h2>
 
-          <div style={{ marginBottom: '16px' }}>
+          <div style={{ marginBottom: '14px' }}>
             <label style={{ fontSize: '12px', color: '#555', fontWeight: '600', display: 'block', marginBottom: '8px' }}>
               Target Roles
             </label>
@@ -102,14 +107,10 @@ export default function Settings() {
                     background: checked ? '#EEEDFE' : '#F8F8F6',
                     border: `1px solid ${checked ? '#534AB7' : '#E5E5E0'}`,
                     borderRadius: '8px', padding: '6px 12px', cursor: 'pointer',
-                    fontSize: '12px', color: checked ? '#534AB7' : '#555', fontWeight: checked ? '600' : '400',
+                    fontSize: '12px', color: checked ? '#534AB7' : '#555',
+                    fontWeight: checked ? '600' : '400',
                   }}>
-                    <input
-                      type="checkbox"
-                      checked={checked}
-                      onChange={() => toggle('roles', role)}
-                      style={{ display: 'none' }}
-                    />
+                    <input type="checkbox" checked={checked} onChange={() => toggle('roles', role)} style={{ display: 'none' }} />
                     {role}
                   </label>
                 )
@@ -117,7 +118,7 @@ export default function Settings() {
             </div>
           </div>
 
-          <div style={{ marginBottom: '16px' }}>
+          <div>
             <label style={{ fontSize: '12px', color: '#555', fontWeight: '600', display: 'block', marginBottom: '8px' }}>
               Target Countries
             </label>
@@ -130,14 +131,10 @@ export default function Settings() {
                     background: checked ? '#E1F5EE' : '#F8F8F6',
                     border: `1px solid ${checked ? '#0F6E56' : '#E5E5E0'}`,
                     borderRadius: '8px', padding: '6px 12px', cursor: 'pointer',
-                    fontSize: '12px', color: checked ? '#0F6E56' : '#555', fontWeight: checked ? '600' : '400',
+                    fontSize: '12px', color: checked ? '#0F6E56' : '#555',
+                    fontWeight: checked ? '600' : '400',
                   }}>
-                    <input
-                      type="checkbox"
-                      checked={checked}
-                      onChange={() => toggle('countries', c)}
-                      style={{ display: 'none' }}
-                    />
+                    <input type="checkbox" checked={checked} onChange={() => toggle('countries', c)} style={{ display: 'none' }} />
                     {c}
                   </label>
                 )
@@ -149,15 +146,17 @@ export default function Settings() {
         {/* Salary */}
         <section style={{
           background: '#fff', border: '1px solid #E5E5E0',
-          borderRadius: '10px', padding: '20px', marginBottom: '20px',
+          borderRadius: '10px', padding: pad, marginBottom: '20px',
         }}>
-          <h2 style={{ fontSize: '14px', fontWeight: '700', color: '#1a1a1a', marginBottom: '14px' }}>
-            Minimum Salary
-          </h2>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '12px' }}>
+          <h2 style={{ fontSize: '14px', fontWeight: '700', color: '#1a1a1a', marginBottom: '14px' }}>Minimum Salary</h2>
+          <div style={{
+            display: 'grid',
+            gridTemplateColumns: isMobile ? '1fr' : 'repeat(3, 1fr)',
+            gap: '12px',
+          }}>
             {[
-              { label: 'UK (£)', key: 'minSalaryUK', prefix: '£' },
-              { label: 'Germany (€)', key: 'minSalaryDE', prefix: '€' },
+              { label: 'UK (£)',          key: 'minSalaryUK', prefix: '£' },
+              { label: 'Germany (€)',     key: 'minSalaryDE', prefix: '€' },
               { label: 'Netherlands (€)', key: 'minSalaryNL', prefix: '€' },
             ].map(({ label, key, prefix }) => (
               <div key={key}>
@@ -172,10 +171,7 @@ export default function Settings() {
                     type="number"
                     value={settings[key]}
                     onChange={e => setSettings(prev => ({ ...prev, [key]: e.target.value }))}
-                    style={{
-                      flex: 1, border: 'none', padding: '8px 10px',
-                      fontSize: '13px', outline: 'none',
-                    }}
+                    style={{ flex: 1, border: 'none', padding: '8px 10px', fontSize: '13px', outline: 'none' }}
                   />
                 </div>
               </div>
@@ -188,8 +184,8 @@ export default function Settings() {
           style={{
             background: saved ? '#0F6E56' : '#534AB7', color: '#fff', border: 'none',
             borderRadius: '8px', padding: '11px 28px', fontSize: '13px',
-            fontWeight: '600', cursor: 'pointer',
-            display: 'flex', alignItems: 'center', gap: '7px',
+            fontWeight: '600', cursor: 'pointer', width: isMobile ? '100%' : 'auto',
+            display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '7px',
             transition: 'background 0.3s',
           }}
         >

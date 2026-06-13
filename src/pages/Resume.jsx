@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import Header from '../components/Header'
 import { CheckCircle2 } from 'lucide-react'
 
@@ -27,8 +27,8 @@ const TIPS = [
     title: 'Cover Letter Tips',
     items: [
       'Address it to the hiring manager by name when possible',
-      'Mention visa sponsorship need early — don\'t hide it',
-      'Show you know the company\'s tech stack',
+      "Mention visa sponsorship need early — don't hide it",
+      "Show you know the company's tech stack",
       'Keep to 3 short paragraphs',
       'End with a clear call to action',
     ],
@@ -46,11 +46,18 @@ const TIPS = [
 ]
 
 export default function Resume() {
-  const [jobTitle, setJobTitle] = useState('')
-  const [country, setCountry] = useState('Netherlands')
-  const [loading, setLoading] = useState(false)
-  const [resume, setResume] = useState('')
-  const [copied, setCopied] = useState(false)
+  const [jobTitle, setJobTitle]   = useState('')
+  const [country, setCountry]     = useState('Netherlands')
+  const [loading, setLoading]     = useState(false)
+  const [resume, setResume]       = useState('')
+  const [copied, setCopied]       = useState(false)
+  const [isMobile, setIsMobile]   = useState(window.innerWidth < 768)
+
+  useEffect(() => {
+    const fn = () => setIsMobile(window.innerWidth < 768)
+    window.addEventListener('resize', fn)
+    return () => window.removeEventListener('resize', fn)
+  }, [])
 
   const apiKey = localStorage.getItem('geminiApiKey') || ''
 
@@ -114,23 +121,27 @@ Tailor it specifically for ${country} job market conventions.`
     a.click()
   }
 
+  const pad = isMobile ? '12px 16px' : '20px 24px'
+
   return (
     <div style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
       <Header title="Resume Builder" subtitle="AI-powered CV tailored for European roles" />
       <div style={{ flex: 1, overflowY: 'auto' }}>
-        <div style={{ display: 'flex', gap: '20px', padding: '20px 24px', alignItems: 'flex-start' }}>
-
+        <div style={{
+          display: 'flex', flexDirection: isMobile ? 'column' : 'row',
+          gap: '16px', padding: pad, alignItems: 'flex-start',
+        }}>
           {/* Left: Builder */}
-          <div style={{ flex: 3, minWidth: 0 }}>
+          <div style={{ flex: isMobile ? 'unset' : 3, width: isMobile ? '100%' : 'auto', minWidth: 0 }}>
             <div style={{
               background: '#fff', border: '1px solid #E5E5E0',
-              borderRadius: '10px', padding: '20px', marginBottom: '16px',
+              borderRadius: '10px', padding: isMobile ? '14px' : '20px', marginBottom: '16px',
             }}>
               <h2 style={{ fontSize: '14px', fontWeight: '700', color: '#1a1a1a', marginBottom: '14px' }}>
                 Generate Tailored CV
               </h2>
 
-              <div style={{ display: 'flex', gap: '10px', marginBottom: '10px' }}>
+              <div style={{ display: 'flex', flexDirection: isMobile ? 'column' : 'row', gap: '10px', marginBottom: '10px' }}>
                 <div style={{ flex: 2 }}>
                   <label style={{ fontSize: '11px', color: '#666', fontWeight: '600', display: 'block', marginBottom: '4px' }}>
                     Target Job Title
@@ -141,7 +152,7 @@ Tailor it specifically for ${country} job market conventions.`
                     placeholder="e.g. DevOps Engineer"
                     style={{
                       width: '100%', border: '1px solid #E5E5E0', borderRadius: '7px',
-                      padding: '8px 10px', fontSize: '13px', outline: 'none',
+                      padding: '8px 10px', fontSize: '13px', outline: 'none', boxSizing: 'border-box',
                     }}
                   />
                 </div>
@@ -175,10 +186,9 @@ Tailor it specifically for ${country} job market conventions.`
                 disabled={!jobTitle || loading || !apiKey}
                 style={{
                   background: '#534AB7', color: '#fff', border: 'none',
-                  borderRadius: '8px', padding: '10px 20px',
-                  fontSize: '13px', fontWeight: '600', cursor: 'pointer',
+                  borderRadius: '8px', padding: '10px 20px', fontSize: '13px',
+                  fontWeight: '600', cursor: 'pointer', width: '100%',
                   opacity: (!jobTitle || loading || !apiKey) ? 0.5 : 1,
-                  width: '100%',
                 }}
               >
                 {loading ? 'Generating your CV...' : 'Generate CV with AI'}
@@ -188,9 +198,9 @@ Tailor it specifically for ${country} job market conventions.`
             {resume && (
               <div style={{
                 background: '#fff', border: '1px solid #E5E5E0',
-                borderRadius: '10px', padding: '20px',
+                borderRadius: '10px', padding: isMobile ? '14px' : '20px',
               }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px', flexWrap: 'wrap', gap: '8px' }}>
                   <h3 style={{ fontSize: '13px', fontWeight: '700', color: '#1a1a1a' }}>Generated CV</h3>
                   <div style={{ display: 'flex', gap: '8px' }}>
                     <button onClick={copy} style={{
@@ -204,8 +214,8 @@ Tailor it specifically for ${country} job market conventions.`
                       {copied ? 'Copied!' : 'Copy'}
                     </button>
                     <button onClick={download} style={{
-                      background: '#E1F5EE', color: '#0F6E56',
-                      border: 'none', borderRadius: '7px', padding: '6px 14px',
+                      background: '#E1F5EE', color: '#0F6E56', border: 'none',
+                      borderRadius: '7px', padding: '6px 14px',
                       fontSize: '12px', fontWeight: '600', cursor: 'pointer',
                     }}>
                       Download .txt
@@ -226,7 +236,7 @@ Tailor it specifically for ${country} job market conventions.`
           </div>
 
           {/* Right: Tips */}
-          <div style={{ flex: 2, minWidth: 0 }}>
+          <div style={{ flex: isMobile ? 'unset' : 2, width: isMobile ? '100%' : 'auto', minWidth: 0 }}>
             {TIPS.map(({ title, items }) => (
               <div key={title} style={{
                 background: '#fff', border: '1px solid #E5E5E0',
@@ -246,7 +256,6 @@ Tailor it specifically for ${country} job market conventions.`
               </div>
             ))}
           </div>
-
         </div>
       </div>
     </div>
